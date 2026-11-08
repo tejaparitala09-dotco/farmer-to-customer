@@ -1,65 +1,22 @@
-"""Seed the 20 requested agricultural sample products into MongoDB.
-
-Run from the project root with: py -3 backend/seed_sample_products.py
-Existing records with these stable IDs are updated instead of duplicated.
+"""Compatibility script to seed sample products into MongoDB.
+Can be run as:
+    python backend/seed_sample_products.py
+or
+    python backend/seed_products.py
 """
+import sys
+from pathlib import Path
 
-from datetime import datetime, timezone
+# Ensure backend directory is in sys.path
+backend_dir = Path(__file__).resolve().parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
-try:
-    from .database import check_connection, ensure_indexes, products_collection
-    from .seed_products import CATALOG_FARMER_ID, CATALOG_FARMER_NAME, PRODUCTS
-except ImportError:
-    from database import check_connection, ensure_indexes, products_collection
-    from seed_products import CATALOG_FARMER_ID, CATALOG_FARMER_NAME, PRODUCTS
+from seed_products import run, PRODUCTS, CATALOG_FARMER_NAME
+from database import check_connection, init_db, products, users
 
-
-SAMPLE_PRODUCT_IDS = (
-    "catalog-tomato",
-    "catalog-potato",
-    "catalog-onion",
-    "catalog-carrot",
-    "catalog-brinjal",
-    "catalog-cabbage",
-    "catalog-cauliflower",
-    "catalog-spinach",
-    "catalog-lady-finger",
-    "catalog-green-chilli",
-    "catalog-apple",
-    "catalog-banana",
-    "catalog-orange",
-    "catalog-mango",
-    "catalog-papaya",
-    "catalog-watermelon",
-    "catalog-pomegranate",
-    "catalog-grapes",
-    "catalog-guava",
-    "catalog-pineapple",
-)
-
-
-def seed_sample_products() -> None:
-    products_by_id = {product["id"]: product for product in PRODUCTS}
-    sample_products = [products_by_id[product_id] for product_id in SAMPLE_PRODUCT_IDS]
-
-    check_connection()
-    ensure_indexes()
-    now = datetime.now(timezone.utc)
-    for product in sample_products:
-        document = {
-            **product,
-            "farmer_id": CATALOG_FARMER_ID,
-            "farmer_name": CATALOG_FARMER_NAME,
-            "created_at": now,
-            "updated_at": now,
-        }
-        products_collection.update_one(
-            {"id": product["id"]},
-            {"$set": document},
-            upsert=True,
-        )
-    print(f"Seeded {len(sample_products)} sample products into MongoDB.")
-
+def seed_sample_products():
+    run()
 
 if __name__ == "__main__":
     seed_sample_products()
