@@ -1,4 +1,5 @@
 import os
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 from dotenv import load_dotenv
@@ -331,6 +332,9 @@ def run():
     print("[Seed] Initializing database indexes...")
     init_db()
 
+    farmer_password = os.getenv("SEED_FARMER_PASSWORD") or secrets.token_urlsafe(24)
+    customer_password = os.getenv("SEED_CUSTOMER_PASSWORD") or secrets.token_urlsafe(24)
+
     # Create / Update default Farmer account
     farmer_email = "farmer@farm.com"
     farmer = users.find_one({"email": farmer_email})
@@ -338,7 +342,7 @@ def run():
         farmer_data = {
             "name": CATALOG_FARMER_NAME,
             "email": farmer_email,
-            "password_hash": hash_password("Password@123"),
+            "password_hash": hash_password(farmer_password),
             "phone": "+91 9876543210",
             "role": "farmer",
             "created_at": datetime.now(timezone.utc),
@@ -346,7 +350,7 @@ def run():
         res = users.insert_one(farmer_data)
         farmer_data["_id"] = res.inserted_id
         farmer = farmer_data
-        print(f"[Seed] Created farmer account: {farmer_email} / Password@123")
+        print(f"[Seed] Created farmer account: {farmer_email}")
     else:
         print(f"[Seed] Farmer account exists: {farmer_email}")
 
@@ -356,7 +360,7 @@ def run():
         users.insert_one({
             "name": CATALOG_FARMER_NAME,
             "email": "seed.farmer@example.com",
-            "password_hash": hash_password("Farmer@123"),
+            "password_hash": hash_password(farmer_password),
             "phone": "9000000000",
             "role": "farmer",
             "created_at": datetime.now(timezone.utc),
@@ -369,13 +373,13 @@ def run():
         customer_data = {
             "name": "Priya Sharma",
             "email": cust_email,
-            "password_hash": hash_password("Password@123"),
+            "password_hash": hash_password(customer_password),
             "phone": "+91 9123456789",
             "role": "customer",
             "created_at": datetime.now(timezone.utc),
         }
         users.insert_one(customer_data)
-        print(f"[Seed] Created customer account: {cust_email} / Password@123")
+        print(f"[Seed] Created customer account: {cust_email}")
     else:
         print(f"[Seed] Customer account exists: {cust_email}")
 
@@ -405,8 +409,6 @@ def run():
         seeded_count += 1
 
     print(f"[Seed] Successfully seeded {seeded_count} agricultural and grocery products!")
-    print(f"[Seed] Farmer Login:   farmer@farm.com   / Password@123")
-    print(f"[Seed] Customer Login: customer@fresh.com / Password@123")
 
 if __name__ == "__main__":
     run()

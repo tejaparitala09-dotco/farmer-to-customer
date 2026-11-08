@@ -16,8 +16,7 @@ A full-stack direct-to-consumer agricultural marketplace connecting local farmer
 
 ### 2. Built-in Sample Catalog
 The database includes 28+ agricultural items across Vegetables, Fruits, Grains, Millets, Pulses, Spices, and Grocery:
-- **Default Farmer Account**: `farmer@farm.com` / `Password@123` (or `seed.farmer@example.com` / `Farmer@123`)
-- **Default Customer Account**: `customer@fresh.com` / `Password@123`
+- Seed accounts are created using local `SEED_FARMER_PASSWORD` and `SEED_CUSTOMER_PASSWORD` environment values, or generated locally when those values are absent. Passwords are never printed or committed.
 
 ---
 
